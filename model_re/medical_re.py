@@ -21,18 +21,23 @@ import time
 import re
 
 class config:
+    # 批量大小
     batch_size = 32
+    # 字符串最大长度
     max_seq_len = 256
+    # 类别个数
     num_p = 23
+    # 学习率
     learning_rate = 1e-5
+    # 轮循数
     EPOCH = 2
 
-    PATH_SCHEMA = "/Users/yangyf/workplace/model/medical_re/predicate.json"
-    PATH_TRAIN = '/Users/yangyf/workplace/model/medical_re/train_data.json'
-    PATH_BERT = "/Users/yangyf/workplace/model/medical_re/"
-    PATH_MODEL = "/Users/yangyf/workplace/model/medical_re/model_re.pkl"
-    PATH_SAVE = '/content/model_re.pkl'
-    tokenizer = BertTokenizer.from_pretrained("/Users/yangyf/workplace/model/medical_re/" + 'vocab.txt')
+    PATH_SCHEMA = "/Users/wangjialin/projects/CMeKG_tools/predicate.json"
+    PATH_TRAIN = '/Users/wangjialin/projects/CMeKG_tools/train_example.json'
+    PATH_BERT = "/Users/wangjialin/projects/CMeKG_tools/model/medical_re/"
+    PATH_MODEL = "/Users/wangjialin/projects/CMeKG_tools/model/medical_re/model_re.pkl"
+    PATH_SAVE = '/Users/wangjialin/projects/CMeKG_tools/model/save'
+    tokenizer = BertTokenizer.from_pretrained("/Users/wangjialin/projects/CMeKG_tools/model/medical_re/" + 'vocab.txt')
 
     id2predicate = {}
     predicate2id = {}
@@ -63,12 +68,12 @@ class IterableDataset(torch.utils.data.IterableDataset):
         batch_size = config.batch_size
         max_seq_len = config.max_seq_len
         num_p = config.num_p
-        batch_token_ids = np.zeros((batch_size, max_seq_len), dtype=np.int)
-        batch_mask_ids = np.zeros((batch_size, max_seq_len), dtype=np.int)
-        batch_segment_ids = np.zeros((batch_size, max_seq_len), dtype=np.int)
-        batch_subject_ids = np.zeros((batch_size, 2), dtype=np.int)
-        batch_subject_labels = np.zeros((batch_size, max_seq_len, 2), dtype=np.int)
-        batch_object_labels = np.zeros((batch_size, max_seq_len, num_p, 2), dtype=np.int)
+        batch_token_ids = np.zeros((batch_size, max_seq_len), dtype=np.integer)
+        batch_mask_ids = np.zeros((batch_size, max_seq_len), dtype=np.integer)
+        batch_segment_ids = np.zeros((batch_size, max_seq_len), dtype=np.integer)
+        batch_subject_ids = np.zeros((batch_size, 2), dtype=np.integer)
+        batch_subject_labels = np.zeros((batch_size, max_seq_len, 2), dtype=np.integer)
+        batch_object_labels = np.zeros((batch_size, max_seq_len, num_p, 2), dtype=np.integer)
         batch_i = 0
         for i in idxs:
             text = self.data[i]['text']
@@ -377,14 +382,15 @@ def run_train():
     # train
     train_data_loader = IterableDataset(train_data, True)
     num_train_data = len(train_data)
-    checkpoint = torch.load(config.PATH_MODEL)
+    map_location = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    checkpoint = torch.load(config.PATH_MODEL,map_location=map_location)
 
     model4s = Model4s()
-    model4s.load_state_dict(checkpoint['model4s_state_dict'])
+    model4s.load_state_dict(checkpoint['model4s_state_dict'],False)
     # model4s.cuda()
 
     model4po = Model4po()
-    model4po.load_state_dict(checkpoint['model4po_state_dict'])
+    model4po.load_state_dict(checkpoint['model4po_state_dict'],False)
     # model4po.cuda()
 
     param_optimizer = list(model4s.named_parameters()) + list(model4po.named_parameters())
