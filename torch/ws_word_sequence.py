@@ -24,10 +24,10 @@ class Word2Sequence(object):
         :param sentence: [word1,word2,word3...]
         '''
         for word in sentence:
-            print(word)
+            # print(word)
             self.count[word] = self.count.get(word,0) + 1
             
-    def build_vocab(self,min=0,max=None,max_features=None):
+    def build_vocab(self,min=5,max=None,max_features=None):
         '''
         生成词典
         :param min:最小出现的次数
@@ -75,10 +75,18 @@ class Word2Sequence(object):
         '''
         return [self.inverse_dict.get(idx) for idx in indices]
     
+    def __len__(self):
+        return len(self.dict)
+    
 
 if __name__ =='__main__':
     ws = Word2Sequence()
-    ws.fit(['我','是','谁','呀'])
-    ws.fit(['我','是','你'])
-    ws.build_vocab()
+    ws.fit(['我','是','谁'])
+    ws.fit(['我','是','我'])
+    ws.fit(['爱','祖国'])
+    ws.build_vocab(min=0)
     print(ws.dict)
+    ret = ws.transform(['我','爱','谁'],max_len=10)
+    print(ret)
+    ret = ws.inverse_transform(ret)
+    print(ret)

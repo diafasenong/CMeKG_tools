@@ -1,0 +1,13 @@
+实现文本情感分类
+1、准备数据集
+    1）、当Dataset中的返回input结果是字符串的时候，可以通过修改collate_fn解决异常问题
+    2）、DataLoader(imdb_dataset,batch_size=2,shuffle=True,collate_fn=collate_fn)
+    3）、word_sequence的准备
+        i、定义字典保存所有的词语
+        ii、根据词频对词语进行保留
+        iii、一个batch中对句子的长度进行统一
+        iv、实现方法吧句子转化为序列和反向操作
+2、构建模型
+    1）、enbedding的使用，实例化
+3、模型训练
+4、模型评估
